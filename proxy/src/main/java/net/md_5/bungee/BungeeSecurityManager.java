@@ -42,7 +42,7 @@ public class BungeeSecurityManager extends SecurityManager
                     throw ex;
                 }
 
-                ProxyServer.getInstance().getLogger().log( Level.WARNING, "Plugin performed restricted action, please inform them to use proper API methods: " + text, ex );
+              //  ProxyServer.getInstance().getLogger().log( Level.WARNING, "Plugin performed restricted action, please inform them to use proper API methods: " + text, ex );
                 break;
             }
         }
