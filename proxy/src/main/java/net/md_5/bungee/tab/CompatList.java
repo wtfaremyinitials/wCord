@@ -10,8 +10,6 @@ import net.md_5.bungee.protocol.ProtocolConstants;
 import net.md_5.bungee.protocol.packet.PlayerListItem;
 
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.UUID;
 
 public class CompatList extends TabList {
 
@@ -30,7 +28,7 @@ public class CompatList extends TabList {
 	public void onPingChange(int ping) {
 		if (!sentPing) {
 			sentPing = true;
-			for(ProxiedPlayer p:BungeeCord.getInstance().getPlayers()) {
+			for (ProxiedPlayer p : BungeeCord.getInstance().getPlayers()) {
 				PlayerListItem packet = new PlayerListItem();
 				packet.setAction(PlayerListItem.Action.UPDATE_LATENCY);
 				PlayerListItem.Item item = new PlayerListItem.Item();
@@ -43,7 +41,23 @@ public class CompatList extends TabList {
 						{
 								item
 						});
-				p.unsafe().sendPacket(packet);
+				if (p.getPendingConnection().getVersion() >= ProtocolConstants.MINECRAFT_SNAPSHOT) {
+					p.unsafe().sendPacket(packet);
+				}else
+				{
+					PlayerListItem packet2 = new PlayerListItem();
+					packet2.setAction(PlayerListItem.Action.REMOVE_PLAYER);
+					PlayerListItem.Item item2 = new PlayerListItem.Item();
+					item2.setUuid(player.getUniqueId());
+					item2.setUsername(player.getName());
+					item2.setDisplayName(player.getName());
+					item2.setPing(player.getPing());
+					packet2.setItems(new PlayerListItem.Item[]
+							{
+									item2
+							});
+					p.unsafe().sendPacket(packet2);
+				}
 				packet.setAction(PlayerListItem.Action.UPDATE_DISPLAY_NAME);
 				p.unsafe().sendPacket(packet);
 			}
@@ -103,7 +117,7 @@ public class CompatList extends TabList {
 		}
 		PlayerListItem packet = new PlayerListItem();
 		packet.setAction(PlayerListItem.Action.ADD_PLAYER);
-		for(ProxiedPlayer p:BungeeCord.getInstance().getPlayers()) {
+		for (ProxiedPlayer p : BungeeCord.getInstance().getPlayers()) {
 			PlayerListItem.Item item = new PlayerListItem.Item();
 			item.setUuid(player.getUniqueId());
 			item.setUsername(player.getName());
@@ -141,6 +155,7 @@ public class CompatList extends TabList {
 		PlayerListItem.Item item = new PlayerListItem.Item();
 		item.setUuid(player.getUniqueId());
 		item.setUsername(player.getName());
+		item.setDisplayName(player.getName());
 		packet.setItems(new PlayerListItem.Item[]
 				{
 						item
