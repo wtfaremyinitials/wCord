@@ -28,21 +28,26 @@ public class CompatList extends TabList {
 
 	@Override
 	public void onPingChange(int ping) {
-//		if (!sentPing) {
-//			sentPing = true;
-//			PlayerListItem packet = new PlayerListItem();
-//			packet.setAction(PlayerListItem.Action.UPDATE_LATENCY);
-//			PlayerListItem.Item item = new PlayerListItem.Item();
-//			item.setUuid(player.getUniqueId());
-//			item.setUsername(player.getName());
-//			item.setDisplayName(ComponentSerializer.toString(TextComponent.fromLegacyText(player.getDisplayName())));
-//			item.setPing(player.getPing());
-//			packet.setItems(new PlayerListItem.Item[]
-//					{
-//							item
-//					});
-//			BungeeCord.getInstance().broadcast(packet);
-//		}
+		if (!sentPing) {
+			sentPing = true;
+			for(ProxiedPlayer p:BungeeCord.getInstance().getPlayers()) {
+				PlayerListItem packet = new PlayerListItem();
+				packet.setAction(PlayerListItem.Action.UPDATE_LATENCY);
+				PlayerListItem.Item item = new PlayerListItem.Item();
+				item.setUuid(player.getUniqueId());
+				item.setUsername(player.getName());
+				item.setDisplayName(p.getPendingConnection().getVersion() >= ProtocolConstants.MINECRAFT_SNAPSHOT ? ComponentSerializer.toString(TextComponent.fromLegacyText(player.getDisplayName())) :
+						player.getDisplayName());
+				item.setPing(player.getPing());
+				packet.setItems(new PlayerListItem.Item[]
+						{
+								item
+						});
+				p.unsafe().sendPacket(packet);
+				packet.setAction(PlayerListItem.Action.UPDATE_DISPLAY_NAME);
+				p.unsafe().sendPacket(packet);
+			}
+		}
 	}
 
 	@Override
