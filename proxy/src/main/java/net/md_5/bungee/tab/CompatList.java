@@ -102,6 +102,19 @@ public class CompatList extends TabList {
 		}
 		if (player.getPendingConnection().getVersion() >= ProtocolConstants.MINECRAFT_SNAPSHOT) {
 			player.unsafe().sendPacket(playerListItem);
+			for (ProxiedPlayer p : players) {
+				PlayerListItem.Item item = new PlayerListItem.Item();
+				item.setUuid(p.getUniqueId());
+				item.setUsername(p.getName());
+				item.setDisplayName(ComponentSerializer.toString(TextComponent.fromLegacyText(p.getDisplayName())));
+				PlayerListItem packet = new PlayerListItem();
+				packet.setAction(PlayerListItem.Action.ADD_PLAYER.UPDATE_DISPLAY_NAME);
+				packet.setItems(new PlayerListItem.Item[]
+						{
+								item
+						});
+				player.unsafe().sendPacket(packet);
+			}
 		} else {
 			// Split up the packet
 			for (PlayerListItem.Item item : playerListItem.getItems()) {
@@ -115,6 +128,7 @@ public class CompatList extends TabList {
 				player.unsafe().sendPacket(packet);
 			}
 		}
+
 		PlayerListItem packet = new PlayerListItem();
 		packet.setAction(PlayerListItem.Action.ADD_PLAYER);
 		for (ProxiedPlayer p : BungeeCord.getInstance().getPlayers()) {
@@ -146,6 +160,7 @@ public class CompatList extends TabList {
 					});
 			p.unsafe().sendPacket(packet);
 		}
+
 	}
 
 	@Override
