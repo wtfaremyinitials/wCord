@@ -108,7 +108,7 @@ public class CompatList extends TabList {
 				item.setUsername(p.getName());
 				item.setDisplayName(ComponentSerializer.toString(TextComponent.fromLegacyText(p.getDisplayName())));
 				PlayerListItem packet = new PlayerListItem();
-				packet.setAction(PlayerListItem.Action.ADD_PLAYER.UPDATE_DISPLAY_NAME);
+				packet.setAction(PlayerListItem.Action.UPDATE_DISPLAY_NAME);
 				packet.setItems(new PlayerListItem.Item[]
 						{
 								item
@@ -119,7 +119,7 @@ public class CompatList extends TabList {
 			// Split up the packet
 			for (PlayerListItem.Item item : playerListItem.getItems()) {
 				PlayerListItem packet = new PlayerListItem();
-				packet.setAction(playerListItem.getAction());
+				packet.setAction(PlayerListItem.Action.ADD_PLAYER);
 
 				packet.setItems(new PlayerListItem.Item[]
 						{
@@ -129,9 +129,10 @@ public class CompatList extends TabList {
 			}
 		}
 
-		PlayerListItem packet = new PlayerListItem();
-		packet.setAction(PlayerListItem.Action.ADD_PLAYER);
+
 		for (ProxiedPlayer p : BungeeCord.getInstance().getPlayers()) {
+			PlayerListItem packet = new PlayerListItem();
+			packet.setAction(PlayerListItem.Action.ADD_PLAYER);
 			PlayerListItem.Item item = new PlayerListItem.Item();
 			item.setUuid(player.getUniqueId());
 			item.setUsername(player.getName());
