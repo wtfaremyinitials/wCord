@@ -15,6 +15,7 @@ public class CompatList extends TabList {
 
 	private boolean sentPing;
 	private String name;
+
 	public CompatList(ProxiedPlayer player) {
 		super(player);
 	}
@@ -34,12 +35,14 @@ public class CompatList extends TabList {
 				PlayerListItem.Item item = new PlayerListItem.Item();
 				item.setUuid(player.getUniqueId());
 				item.setUsername(player.getName());
-				item.setDisplayName(this.name);
+				item.setDisplayName(p.getPendingConnection().getVersion() >= ProtocolConstants.MINECRAFT_SNAPSHOT ? ComponentSerializer.toString(TextComponent.fromLegacyText(this.name)) : this.name);
 				item.setPing(player.getPing());
 				packet.setItems(new PlayerListItem.Item[]
 						{
 								item
 						});
+				p.unsafe().sendPacket(packet);
+				packet.setAction(PlayerListItem.Action.UPDATE_DISPLAY_NAME);
 				p.unsafe().sendPacket(packet);
 			}
 		}
@@ -52,6 +55,7 @@ public class CompatList extends TabList {
 
 	@Override
 	public void onConnect() {
+		this.sentPing = false;
 		this.name = player.getDisplayName();
 		PlayerListItem playerListItem = new PlayerListItem();
 		playerListItem.setAction(PlayerListItem.Action.ADD_PLAYER);
@@ -63,7 +67,8 @@ public class CompatList extends TabList {
 			PlayerListItem.Item item = items[i++] = new PlayerListItem.Item();
 			item.setUuid(p.getUniqueId());
 			item.setUsername(p.getName());
-			item.setDisplayName(player.getPendingConnection().getVersion() >= ProtocolConstants.MINECRAFT_SNAPSHOT ? ComponentSerializer.toString(TextComponent.fromLegacyText(p.getDisplayName())) : p.getDisplayName());
+			item.setDisplayName(player.getPendingConnection().getVersion() >= ProtocolConstants.MINECRAFT_SNAPSHOT ? ComponentSerializer.toString(TextComponent.fromLegacyText(p.getDisplayName())) : p.getDisplayName
+					());
 			LoginResult loginResult = ((UserConnection) p).getPendingConnection().getLoginProfile();
 			if (loginResult != null) {
 				String[][] props = new String[loginResult.getProperties().length][];
@@ -84,19 +89,6 @@ public class CompatList extends TabList {
 		}
 		if (player.getPendingConnection().getVersion() >= ProtocolConstants.MINECRAFT_SNAPSHOT) {
 			player.unsafe().sendPacket(playerListItem);
-			for (ProxiedPlayer p : players) {
-				PlayerListItem.Item item = new PlayerListItem.Item();
-				item.setUuid(p.getUniqueId());
-				item.setUsername(p.getName());
-				item.setDisplayName(ComponentSerializer.toString(TextComponent.fromLegacyText(p.getDisplayName())));
-				PlayerListItem packet = new PlayerListItem();
-				packet.setAction(PlayerListItem.Action.ADD_PLAYER);
-				packet.setItems(new PlayerListItem.Item[]
-						{
-								item
-						});
-				player.unsafe().sendPacket(packet);
-			}
 		} else {
 			// Split up the packet
 			for (PlayerListItem.Item item : playerListItem.getItems()) {
@@ -110,16 +102,13 @@ public class CompatList extends TabList {
 				player.unsafe().sendPacket(packet);
 			}
 		}
-
-
 		for (ProxiedPlayer p : BungeeCord.getInstance().getPlayers()) {
 			PlayerListItem packet = new PlayerListItem();
 			packet.setAction(PlayerListItem.Action.ADD_PLAYER);
 			PlayerListItem.Item item = new PlayerListItem.Item();
 			item.setUuid(player.getUniqueId());
 			item.setUsername(player.getName());
-			item.setDisplayName(p.getPendingConnection().getVersion() >= ProtocolConstants.MINECRAFT_SNAPSHOT ? ComponentSerializer.toString(TextComponent.fromLegacyText(player.getDisplayName())) :
-					player.getDisplayName());
+			item.setDisplayName(p.getPendingConnection().getVersion() >= ProtocolConstants.MINECRAFT_SNAPSHOT ? ComponentSerializer.toString(TextComponent.fromLegacyText(this.name)) : this.name);
 			LoginResult loginResult = ((UserConnection) player).getPendingConnection().getLoginProfile();
 			if (loginResult != null) {
 				String[][] props = new String[loginResult.getProperties().length][];
@@ -148,16 +137,18 @@ public class CompatList extends TabList {
 
 	@Override
 	public void onDisconnect() {
-		PlayerListItem packet = new PlayerListItem();
-		packet.setAction(PlayerListItem.Action.REMOVE_PLAYER);
-		PlayerListItem.Item item = new PlayerListItem.Item();
-		item.setUuid(player.getUniqueId());
-		item.setUsername(player.getName());
-		item.setDisplayName(this.name);
-		packet.setItems(new PlayerListItem.Item[]
-				{
-						item
-				});
-		BungeeCord.getInstance().broadcast(packet);
+		for (ProxiedPlayer p : BungeeCord.getInstance().getPlayers()) {
+			PlayerListItem packet = new PlayerListItem();
+			packet.setAction(PlayerListItem.Action.REMOVE_PLAYER);
+			PlayerListItem.Item item = new PlayerListItem.Item();
+			item.setUuid(player.getUniqueId());
+			item.setUsername(player.getName());
+			item.setDisplayName(p.getPendingConnection().getVersion() >= ProtocolConstants.MINECRAFT_SNAPSHOT ? ComponentSerializer.toString(TextComponent.fromLegacyText(this.name)) : this.name);
+			packet.setItems(new PlayerListItem.Item[]
+					{
+							item
+					});
+			p.unsafe().sendPacket(packet);
+		}
 	}
 }
