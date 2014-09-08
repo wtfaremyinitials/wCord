@@ -31,7 +31,7 @@ public class CompatList extends TabList {
 			sentPing = true;
 			for (ProxiedPlayer p : BungeeCord.getInstance().getPlayers()) {
 				PlayerListItem packet = new PlayerListItem();
-				packet.setAction(PlayerListItem.Action.UPDATE_LATENCY);
+				packet.setAction(PlayerListItem.Action.ADD_PLAYER);
 				PlayerListItem.Item item = new PlayerListItem.Item();
 				item.setUuid(player.getUniqueId());
 				item.setUsername(player.getName());
