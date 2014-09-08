@@ -14,7 +14,7 @@ import java.util.Collection;
 public class CompatList extends TabList {
 
 	private boolean sentPing;
-
+	private String name;
 	public CompatList(ProxiedPlayer player) {
 		super(player);
 	}
@@ -34,31 +34,12 @@ public class CompatList extends TabList {
 				PlayerListItem.Item item = new PlayerListItem.Item();
 				item.setUuid(player.getUniqueId());
 				item.setUsername(player.getName());
-				item.setDisplayName(p.getPendingConnection().getVersion() >= ProtocolConstants.MINECRAFT_SNAPSHOT ? ComponentSerializer.toString(TextComponent.fromLegacyText(player.getDisplayName())) :
-						player.getDisplayName());
+				item.setDisplayName(this.name);
 				item.setPing(player.getPing());
 				packet.setItems(new PlayerListItem.Item[]
 						{
 								item
 						});
-				if (p.getPendingConnection().getVersion() >= ProtocolConstants.MINECRAFT_SNAPSHOT) {
-					p.unsafe().sendPacket(packet);
-				}else
-				{
-					PlayerListItem packet2 = new PlayerListItem();
-					packet2.setAction(PlayerListItem.Action.REMOVE_PLAYER);
-					PlayerListItem.Item item2 = new PlayerListItem.Item();
-					item2.setUuid(player.getUniqueId());
-					item2.setUsername(player.getName());
-					item2.setDisplayName(player.getName());
-					item2.setPing(player.getPing());
-					packet2.setItems(new PlayerListItem.Item[]
-							{
-									item2
-							});
-					p.unsafe().sendPacket(packet2);
-				}
-				packet.setAction(PlayerListItem.Action.UPDATE_DISPLAY_NAME);
 				p.unsafe().sendPacket(packet);
 			}
 		}
@@ -71,6 +52,7 @@ public class CompatList extends TabList {
 
 	@Override
 	public void onConnect() {
+		this.name = player.getDisplayName();
 		PlayerListItem playerListItem = new PlayerListItem();
 		playerListItem.setAction(PlayerListItem.Action.ADD_PLAYER);
 		Collection<ProxiedPlayer> players = BungeeCord.getInstance().getPlayers();
@@ -108,7 +90,7 @@ public class CompatList extends TabList {
 				item.setUsername(p.getName());
 				item.setDisplayName(ComponentSerializer.toString(TextComponent.fromLegacyText(p.getDisplayName())));
 				PlayerListItem packet = new PlayerListItem();
-				packet.setAction(PlayerListItem.Action.UPDATE_DISPLAY_NAME);
+				packet.setAction(PlayerListItem.Action.ADD_PLAYER);
 				packet.setItems(new PlayerListItem.Item[]
 						{
 								item
@@ -171,7 +153,7 @@ public class CompatList extends TabList {
 		PlayerListItem.Item item = new PlayerListItem.Item();
 		item.setUuid(player.getUniqueId());
 		item.setUsername(player.getName());
-		item.setDisplayName(player.getDisplayName());
+		item.setDisplayName(this.name);
 		packet.setItems(new PlayerListItem.Item[]
 				{
 						item
