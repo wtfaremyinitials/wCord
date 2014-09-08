@@ -89,6 +89,8 @@ public class CompatList extends TabList {
 		}
 		if (player.getPendingConnection().getVersion() >= ProtocolConstants.MINECRAFT_SNAPSHOT) {
 			player.unsafe().sendPacket(playerListItem);
+			playerListItem.setAction(PlayerListItem.Action.UPDATE_DISPLAY_NAME);
+			player.unsafe().sendPacket(playerListItem);
 		} else {
 			// Split up the packet
 			for (PlayerListItem.Item item : playerListItem.getItems()) {
@@ -131,6 +133,7 @@ public class CompatList extends TabList {
 							item
 					});
 			p.unsafe().sendPacket(packet);
+
 		}
 
 	}
