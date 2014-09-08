@@ -171,7 +171,7 @@ public class CompatList extends TabList {
 		PlayerListItem.Item item = new PlayerListItem.Item();
 		item.setUuid(player.getUniqueId());
 		item.setUsername(player.getName());
-		item.setDisplayName(player.getName());
+		item.setDisplayName(player.getDisplayName());
 		packet.setItems(new PlayerListItem.Item[]
 				{
 						item
