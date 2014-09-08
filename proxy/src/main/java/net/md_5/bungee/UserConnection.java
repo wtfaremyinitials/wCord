@@ -172,7 +172,7 @@ public final class UserConnection implements ProxiedPlayer
         Preconditions.checkArgument( name.length() <= 16, "Display name cannot be longer than 16 characters" );
 		getTabListHandler().onDisconnect();
         displayName = name;
-		getTabListHandler().onDisconnect();
+		getTabListHandler().onConnect();
     }
 
     @Override
