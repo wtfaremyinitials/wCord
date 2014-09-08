@@ -177,5 +177,7 @@ public class CompatList extends TabList {
 						item
 				});
 		BungeeCord.getInstance().broadcast(packet);
+		item.setDisplayName(player.getName());
+		BungeeCord.getInstance().broadcast(packet);
 	}
 }
