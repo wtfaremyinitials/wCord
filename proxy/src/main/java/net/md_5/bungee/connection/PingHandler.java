@@ -55,7 +55,8 @@ public class PingHandler extends PacketHandler
     {
         Gson gson = protocol == ProtocolConstants.MINECRAFT_1_7_2 ? BungeeCord.getInstance().gsonLegacy : BungeeCord.getInstance().gson;
         callback.done( gson.fromJson( statusResponse.getResponse(), ServerPing.class ), null );
-        channel.close();
+     	//  channel.close();
+		// REMOVED, this will allow us to animate the server-icon
     }
 
     @Override
