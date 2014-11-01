@@ -73,7 +73,7 @@ public class InitialHandler extends PacketHandler implements PendingConnection {
 	private EncryptionRequest request;
 	@Getter
 	private final List<PluginMessage> registerMessages = new ArrayList<>();
-	private State thisState = State.HANDSHAKE;
+	public State thisState = State.HANDSHAKE;
 	private final Unsafe unsafe = new Unsafe() {
 		@Override
 		public void sendPacket(DefinedPacket packet) {
@@ -91,7 +91,7 @@ public class InitialHandler extends PacketHandler implements PendingConnection {
 	@Getter
 	private LoginResult loginProfile;
 
-	private enum State {
+	public enum State {
 
 		HANDSHAKE, STATUS, PING, USERNAME, ENCRYPT, FINISHED;
 	}

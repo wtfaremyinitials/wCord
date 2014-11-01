@@ -32,7 +32,8 @@ public class AnimatedMotd {
 	static {
 		load();
 	}
-	public static void load(){
+
+	public static void load() {
 		images = new ArrayList<BufferedImage>();
 		motd = new ArrayList<String>();
 		File f = new File("server-icon");
@@ -66,13 +67,14 @@ public class AnimatedMotd {
 
 		}
 	}
+
 	public void handleSend(final ProxyPingEvent pingResult, final InitialHandler initialHandler) {
 		BungeeCord.getInstance().getConnectionThrottle().unthrottle(initialHandler.getAddress().getAddress());
 		final Gson gson = initialHandler.getHandshake().getProtocolVersion() == ProtocolConstants.MINECRAFT_1_7_2 ? BungeeCord.getInstance().gsonLegacy : BungeeCord.getInstance().gson;
 		task = initialHandler.getCh().getHandle().eventLoop().scheduleAtFixedRate(new Runnable() {
 			@Override
 			public void run() {
-				if (initialHandler.getCh().getHandle().isOpen()) {
+				if (initialHandler.getCh().getHandle().isOpen() && initialHandler.thisState == InitialHandler.State.PING) {
 					if (images.size() == 0) initialHandler.getCh().close();
 					if (images.size() <= frame) {
 						frame = 0;
