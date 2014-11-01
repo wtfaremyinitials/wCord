@@ -69,6 +69,7 @@ import net.md_5.bungee.api.plugin.Plugin;
 import net.md_5.bungee.api.plugin.PluginManager;
 import net.md_5.bungee.command.*;
 import net.md_5.bungee.conf.YamlConfig;
+import net.md_5.bungee.forge.ForgeConstants;
 import net.md_5.bungee.log.LoggingOutputStream;
 import net.md_5.bungee.netty.PipelineUtils;
 import net.md_5.bungee.protocol.DefinedPacket;
@@ -146,7 +147,7 @@ public class BungeeCord extends ProxyServer
     private ConnectionThrottle connectionThrottle;
     private final ModuleManager moduleManager = new ModuleManager();
 
-
+    
     {
         // TODO: Proper fallback when we interface the manager
         getPluginManager().registerCommand( null, new CommandReload() );
@@ -228,6 +229,10 @@ public class BungeeCord extends ProxyServer
 
         pluginManager.loadPlugins();
         config.load();
+
+        registerChannel( ForgeConstants.FML_TAG );
+        registerChannel( ForgeConstants.FML_HANDSHAKE_TAG );
+        registerChannel( ForgeConstants.FORGE_REGISTER );
 
         isRunning = true;
 
@@ -538,7 +543,7 @@ public class BungeeCord extends ProxyServer
 
     public PluginMessage registerChannels()
     {
-        return new PluginMessage( "REGISTER", Util.format( pluginChannels, "\00" ).getBytes( Charsets.UTF_8 ) );
+        return new PluginMessage( "REGISTER", Util.format( pluginChannels, "\00" ).getBytes( Charsets.UTF_8 ), false );
     }
 
     @Override
@@ -550,7 +555,7 @@ public class BungeeCord extends ProxyServer
     @Override
     public String getGameVersion()
     {
-        return "1.7.9";
+        return "1.8";
     }
 
     @Override
@@ -603,14 +608,19 @@ public class BungeeCord extends ProxyServer
         connectionLock.writeLock().lock();
         try
         {
-            connections.remove( con.getName() );
-            connectionsByOfflineUUID.remove( con.getPendingConnection().getOfflineId() );
+            // TODO See #1218
+            if ( connections.get( con.getName() ) == con )
+            {
+                connections.remove( con.getName() );
+                connectionsByOfflineUUID.remove( con.getPendingConnection().getOfflineId() );
+            }
         } finally
         {
             connectionLock.writeLock().unlock();
         }
     }
 
+    @Override
     public Collection<String> getDisabledCommands()
     {
         return config.getDisabledCommands();
