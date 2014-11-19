@@ -41,8 +41,8 @@ public class EncryptionRequest extends DefinedPacket
         writeString( serverId, buf );
         if ( protocolVersion < ProtocolConstants.MINECRAFT_SNAPSHOT )
         {
-            writeArrayLegacy( publicKey, buf, false );
-            writeArrayLegacy( verifyToken, buf, false );
+            writeArrayLegacy( publicKey, buf );
+            writeArrayLegacy( verifyToken, buf );
         } else
         {
             writeArray( publicKey, buf );

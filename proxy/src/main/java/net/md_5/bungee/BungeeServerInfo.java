@@ -110,7 +110,7 @@ public class BungeeServerInfo implements ServerInfo
                 return true;
             } else if ( queue )
             {
-                packetQueue.add( new PluginMessage( channel, data, false ) );
+                packetQueue.add( new PluginMessage( channel, data ) );
             }
             return false;
         }

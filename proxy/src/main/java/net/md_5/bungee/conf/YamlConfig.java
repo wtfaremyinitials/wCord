@@ -246,7 +246,6 @@ public class YamlConfig implements ConfigurationAdapter
     @SuppressWarnings("unchecked")
     public Collection<String> getPermissions(String group)
     {
-        Collection<String> permissions = get( "permissions." + group, null );
-        return ( permissions == null ) ? Collections.EMPTY_SET : permissions;
+        return get( "permissions." + group, Collections.EMPTY_LIST );
     }
 }

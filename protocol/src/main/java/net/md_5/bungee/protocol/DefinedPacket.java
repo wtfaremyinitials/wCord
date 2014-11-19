@@ -31,30 +31,18 @@ public abstract class DefinedPacket
         return new String( b, Charsets.UTF_8 );
     }
 
-    public static void writeArrayLegacy(byte[] b, ByteBuf buf, boolean allowExtended)
+    public static void writeArrayLegacy(byte[] b, ByteBuf buf)
     {
-        // (Integer.MAX_VALUE & 0x1FFF9A ) = 2097050 - Forge's current upper limit
-        if ( allowExtended )
-        {
-            Preconditions.checkArgument( b.length <= ( Integer.MAX_VALUE & 0x1FFF9A ), "Cannot send array longer than 2097050 (got %s bytes)", b.length );
-        } else
-        {
-            Preconditions.checkArgument( b.length <= Short.MAX_VALUE, "Cannot send array longer than Short.MAX_VALUE (got %s bytes)", b.length );
-        }
-        // Write a 2 or 3 byte number that represents the length of the packet. (3 byte "shorts" for Forge only)
-        // No vanilla packet should give a 3 byte packet, this method will still retain vanilla behaviour.
-        writeVarShort( buf, b.length );
+        Preconditions.checkArgument( b.length <= Short.MAX_VALUE, "Cannot send array longer than Short.MAX_VALUE (got %s bytes)", b.length );
+
+        buf.writeShort( b.length );
         buf.writeBytes( b );
     }
 
     public static byte[] readArrayLegacy(ByteBuf buf)
     {
-        // Read in a 2 or 3 byte number that represents the length of the packet. (3 byte "shorts" for Forge only)
-        // No vanilla packet should give a 3 byte packet, this method will still retain vanilla behaviour.
-        int len = readVarShort( buf );
-
-        // (Integer.MAX_VALUE & 0x1FFF9A ) = 2097050 - Forge's current upper limit
-        Preconditions.checkArgument( len <= ( Integer.MAX_VALUE & 0x1FFF9A ), "Cannot receive array longer than 2097050 (got %s bytes)", len );
+        short len = buf.readShort();
+        Preconditions.checkArgument( len <= Short.MAX_VALUE, "Cannot receive array longer than Short.MAX_VALUE (got %s bytes)", len );
 
         byte[] ret = new byte[ len ];
         buf.readBytes( ret );
@@ -96,11 +84,6 @@ public abstract class DefinedPacket
 
     public static int readVarInt(ByteBuf input)
     {
-        return readVarInt( input, 5 );
-    }
-
-    public static int readVarInt(ByteBuf input, int maxBytes)
-    {
         int out = 0;
         int bytes = 0;
         byte in;
@@ -110,7 +93,7 @@ public abstract class DefinedPacket
 
             out |= ( in & 0x7F ) << ( bytes++ * 7 );
 
-            if ( bytes > maxBytes )
+            if ( bytes > 5 )
             {
                 throw new RuntimeException( "VarInt too big" );
             }
@@ -143,33 +126,6 @@ public abstract class DefinedPacket
             {
                 break;
             }
-        }
-    }
-
-    public static int readVarShort(ByteBuf buf)
-    {
-        int low = buf.readUnsignedShort();
-        int high = 0;
-        if ( ( low & 0x8000 ) != 0 )
-        {
-            low = low & 0x7FFF;
-            high = buf.readUnsignedByte();
-        }
-        return ( ( high & 0xFF ) << 15 ) | low;
-    }
-
-    public static void writeVarShort(ByteBuf buf, int toWrite)
-    {
-        int low = toWrite & 0x7FFF;
-        int high = ( toWrite & 0x7F8000 ) >> 15;
-        if ( high != 0 )
-        {
-            low = low | 0x8000;
-        }
-        buf.writeShort( low );
-        if ( high != 0 )
-        {
-            buf.writeByte( high );
         }
     }
 
